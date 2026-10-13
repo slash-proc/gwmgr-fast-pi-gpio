@@ -1,0 +1,9 @@
+/build/
+/build-release/
+/build-tcp/
+/dma-grid-results.csv
+__pycache__/
+*.py[cod]
+*.egg-info/
+/screen-session
+/snapshots/
