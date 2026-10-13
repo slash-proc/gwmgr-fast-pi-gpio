@@ -101,6 +101,7 @@ struct gdb_target {
     struct gpio_dap_backend dap;
     bool attached;
     bool running;
+    bool halt_failure_pending;
     bool debug;
     size_t read_cache_size;
     bool read_cache_valid;
@@ -974,8 +975,19 @@ static bool handle_packet(struct gdb_target *target,
     if (length == 0U) {
         return send_text_packet(fd, "");
     }
+    if (target->halt_failure_pending && packet[0] != '?') {
+        target->halt_failure_pending = false;
+    }
     switch (packet[0]) {
     case '?':
+        /* A raw Ctrl-C has no request packet to carry an error response. If
+         * the SWD halt failed, defer that error until the client's usual '?'
+         * state query. This keeps the TCP/GDB session alive while allowing
+         * GnWManager's halt sequence to observe the failure. */
+        if (target->halt_failure_pending) {
+            target->halt_failure_pending = false;
+            return send_error(fd, 1U);
+        }
         return send_text_packet(fd, target->running ? "S05" : "S02");
     case 'm':
         return handle_memory_read(target, fd, packet, length);
@@ -1066,6 +1078,7 @@ static bool handle_client(struct gdb_target *target, int fd)
         fprintf(stderr, "[gdb-debug] client attached\n");
     }
     if (!target->attached) {
+        target->halt_failure_pending = false;
         if (!gpio_dap_attach(&target->dap, &target->idcode)) {
             (void)send_text_packet(fd, "E01");
             return false;
@@ -1100,8 +1113,14 @@ static bool handle_client(struct gdb_target *target, int fd)
         if (result == packet_interrupt) {
             bool halted = gpio_dap_halt(&target->dap);
             if (!halted) {
-                return false;
+                target->halt_failure_pending = true;
+                if (target->debug) {
+                    fprintf(stderr,
+                            "[gdb-debug] interrupt halt failed; keeping session open\n");
+                }
+                continue;
             }
+            target->halt_failure_pending = false;
             target->running = false;
             if (!send_text_packet(fd, "S02")) {
                 return false;

@@ -17,6 +17,22 @@ static void query(const char *request, char *response, size_t capacity)
     close(sockets[1]);
 }
 
+static void query_pending_halt(const char *request,
+                               char *response,
+                               size_t capacity)
+{
+    int sockets[2];
+    assert(socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) == 0);
+    struct gdb_target target = {.halt_failure_pending = true};
+    assert(handle_packet(&target, sockets[0], (const uint8_t *)request,
+                         strlen(request)));
+    ssize_t count = recv(sockets[1], response, capacity - 1U, 0);
+    assert(count > 0);
+    response[count] = '\0';
+    close(sockets[0]);
+    close(sockets[1]);
+}
+
 int main(void)
 {
     char response[2048];
@@ -33,6 +49,8 @@ int main(void)
     assert(!writable_register_index((const uint8_t *)"1c", 2U, &index));
     query("qSupported", response, sizeof(response));
     assert(strstr(response, "qXfer:features:read+") != NULL);
+    query_pending_halt("?", response, sizeof(response));
+    assert(strncmp(response, "$E01#", 5U) == 0);
     query("qXfer:features:read:target.xml:0,fff", response, sizeof(response));
     assert(strncmp(response, "$l<?xml", 7U) == 0);
     assert(strstr(response, "arm-m-profile.xml") != NULL);
