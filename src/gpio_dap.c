@@ -420,6 +420,39 @@ bool gpio_dap_read_core_register(struct gpio_dap_backend *backend,
            read_word(backend, cortex_m_dcrdr, value);
 }
 
+bool gpio_dap_read_m_system_register(struct gpio_dap_backend *backend,
+                                     unsigned index,
+                                     uint32_t *value)
+{
+    if (backend == NULL || !backend->connected || value == NULL) {
+        return false;
+    }
+
+    unsigned selector = index;
+    unsigned shift = 0U;
+    uint32_t mask = UINT32_MAX;
+    if (index >= gpio_dap_primask_register &&
+        index <= gpio_dap_control_register) {
+        selector = 20U;
+        shift = (index & 3U) * 8U;
+        mask = UINT32_C(0xff);
+    } else if (index != gpio_dap_msp_register &&
+               index != gpio_dap_psp_register) {
+        return false;
+    }
+
+    if (!write_word(backend, cortex_m_dcrsr, selector) ||
+        !wait_core_register_ready(backend)) {
+        return false;
+    }
+    uint32_t raw = 0U;
+    if (!read_word(backend, cortex_m_dcrdr, &raw)) {
+        return false;
+    }
+    *value = (raw >> shift) & mask;
+    return true;
+}
+
 bool gpio_dap_write_core_register(struct gpio_dap_backend *backend,
                                   unsigned index,
                                   uint32_t value)

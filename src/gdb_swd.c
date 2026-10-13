@@ -34,18 +34,29 @@ enum {
     max_packet_size = 262144,
     max_memory_request = 65536,
     core_register_count = 17,
+    m_system_register_count = 6,
+    gdb_register_count = core_register_count + m_system_register_count,
     read_cache_capacity = 64U * 1024U,
 };
 
 static const uint32_t external_flash_base = UINT32_C(0x90000000);
 static const uint32_t external_flash_limit = UINT32_C(0xa0000000);
 
-/* GDB must not interpret our 17-word Cortex-M packet as legacy ARM + FPA.
+/* Keep the core feature and M-system feature separate, as GWemu does. This
+ * lets a regular GDB client resolve the optional system registers from the
+ * feature annex while keeping the existing Cortex-M core register numbers.
  * xPSR uses the standard M-profile RSP register number 25; p10 remains an
  * alias for existing minimal clients such as GnWManager. */
 static const char target_xml[] =
     "<?xml version=\"1.0\"?><!DOCTYPE target SYSTEM \"gdb-target.dtd\">"
-    "<target><architecture>arm</architecture>"
+    "<target xmlns:xi=\"http://www.w3.org/2001/XInclude\">"
+    "<architecture>arm</architecture>"
+    "<xi:include href=\"arm-m-profile.xml\"/>"
+    "<xi:include href=\"arm-m-system.xml\"/>"
+    "</target>";
+
+static const char arm_m_profile_xml[] =
+    "<?xml version=\"1.0\"?><!DOCTYPE feature SYSTEM \"gdb-target.dtd\">"
     "<feature name=\"org.gnu.gdb.arm.m-profile\">"
     "<reg name=\"r0\" bitsize=\"32\" regnum=\"0\"/>"
     "<reg name=\"r1\" bitsize=\"32\"/><reg name=\"r2\" bitsize=\"32\"/>"
@@ -57,7 +68,27 @@ static const char target_xml[] =
     "<reg name=\"sp\" bitsize=\"32\" type=\"data_ptr\"/>"
     "<reg name=\"lr\" bitsize=\"32\"/><reg name=\"pc\" bitsize=\"32\" type=\"code_ptr\"/>"
     "<reg name=\"xpsr\" bitsize=\"32\" regnum=\"25\"/>"
-    "</feature></target>";
+    "</feature>";
+
+static const char arm_m_system_xml[] =
+    "<?xml version=\"1.0\"?><!DOCTYPE feature SYSTEM \"gdb-target.dtd\">"
+    "<feature name=\"org.gnu.gdb.arm.m-system\">"
+    "<reg name=\"msp\" bitsize=\"32\" regnum=\"26\" type=\"int\"/>"
+    "<reg name=\"psp\" bitsize=\"32\" regnum=\"27\" type=\"int\"/>"
+    "<reg name=\"primask\" bitsize=\"32\" regnum=\"28\" type=\"int\"/>"
+    "<reg name=\"control\" bitsize=\"32\" regnum=\"29\" type=\"int\"/>"
+    "<reg name=\"basepri\" bitsize=\"32\" regnum=\"30\" type=\"int\"/>"
+    "<reg name=\"faultmask\" bitsize=\"32\" regnum=\"31\" type=\"int\"/>"
+    "</feature>";
+
+static const unsigned m_system_register_indices[m_system_register_count] = {
+    gpio_dap_msp_register,
+    gpio_dap_psp_register,
+    gpio_dap_primask_register,
+    gpio_dap_control_register,
+    gpio_dap_basepri_register,
+    gpio_dap_faultmask_register,
+};
 
 enum packet_result {
     packet_closed = 0,
@@ -729,9 +760,40 @@ static bool register_index(const uint8_t *packet,
         return false;
     }
     if (parsed == 25U) parsed = 16U;
+    if (parsed < core_register_count) {
+        *index = (unsigned)parsed;
+        return true;
+    }
+    if (parsed >= 26U &&
+        parsed < 26U + m_system_register_count) {
+        *index = m_system_register_indices[parsed - 26U];
+        return true;
+    }
+    return false;
+}
+
+static bool writable_register_index(const uint8_t *packet,
+                                    size_t length,
+                                    unsigned *index)
+{
+    uint32_t parsed = 0U;
+    if (!parse_hex_u32(packet, length, &parsed)) {
+        return false;
+    }
+    if (parsed == 25U) parsed = 16U;
     if (parsed >= core_register_count) return false;
     *index = (unsigned)parsed;
     return true;
+}
+
+static bool read_register(struct gdb_target *target,
+                          unsigned index,
+                          uint32_t *value)
+{
+    if (index < core_register_count) {
+        return gpio_dap_read_core_register(&target->dap, index, value);
+    }
+    return gpio_dap_read_m_system_register(&target->dap, index, value);
 }
 
 static bool handle_register_read(struct gdb_target *target,
@@ -746,7 +808,7 @@ static bool handle_register_read(struct gdb_target *target,
     uint8_t bytes[sizeof(value)];
     uint8_t response[sizeof(value) * 2U + 1U];
     if (!register_index(packet + 1U, length - 1U, &index) ||
-        !gpio_dap_read_core_register(&target->dap, index, &value)) {
+        !read_register(target, index, &value)) {
         return send_error(fd, 1U);
     }
     store_le32(bytes, value);
@@ -765,9 +827,9 @@ static bool handle_register_write(struct gdb_target *target,
     const uint8_t *equals = memchr(packet, '=', length);
     unsigned index = 0U;
     uint8_t bytes[sizeof(uint32_t)] = {0U};
-    if (equals == NULL || !register_index(packet + 1U,
-                                           (size_t)(equals - (packet + 1U)),
-                                           &index) ||
+    if (equals == NULL || !writable_register_index(packet + 1U,
+                                                   (size_t)(equals - (packet + 1U)),
+                                                   &index) ||
         !decode_hex_bytes(equals + 1U,
                           (size_t)(packet + length - (equals + 1U)),
                           bytes,
@@ -782,17 +844,25 @@ static bool handle_all_registers(struct gdb_target *target, int fd)
 {
     if (!gpio_dap_halt(&target->dap)) return send_error(fd, 1U);
     target->running = false;
-    uint8_t response[core_register_count * sizeof(uint32_t) * 2U + 1U];
-    for (unsigned index = 0U; index < core_register_count; ++index) {
+    uint8_t response[gdb_register_count * sizeof(uint32_t) * 2U + 1U];
+    for (unsigned register_number = 0U;
+         register_number < gdb_register_count;
+         ++register_number) {
+        unsigned index = 0U;
+        if (register_number < core_register_count) {
+            index = register_number;
+        } else {
+            index = m_system_register_indices[register_number - core_register_count];
+        }
         uint32_t value = 0U;
-        if (!gpio_dap_read_core_register(&target->dap, index, &value)) {
+        if (!read_register(target, index, &value)) {
             return send_error(fd, 1U);
         }
         uint8_t bytes[sizeof(value)];
         store_le32(bytes, value);
         (void)encode_hex_bytes(bytes,
                                sizeof(bytes),
-                               response + index * sizeof(bytes) * 2U);
+                               response + register_number * sizeof(bytes) * 2U);
     }
     response[sizeof(response) - 1U] = '\0';
     return send_text_packet(fd, (const char *)response);
@@ -820,6 +890,80 @@ static bool decode_monitor_command(const uint8_t *packet,
     }
     command[encoded_length / 2U] = '\0';
     return encoded_length % 2U == 0U;
+}
+
+static const char *feature_xml(const uint8_t *annex, size_t length)
+{
+    if (length == strlen("target.xml") &&
+        memcmp(annex, "target.xml", length) == 0) {
+        return target_xml;
+    }
+    if (length == strlen("arm-m-profile.xml") &&
+        memcmp(annex, "arm-m-profile.xml", length) == 0) {
+        return arm_m_profile_xml;
+    }
+    if (length == strlen("arm-m-system.xml") &&
+        memcmp(annex, "arm-m-system.xml", length) == 0) {
+        return arm_m_system_xml;
+    }
+    return NULL;
+}
+
+static bool handle_feature_read(int fd,
+                                const uint8_t *packet,
+                                size_t length)
+{
+    static const char prefix[] = "qXfer:features:read:";
+    const size_t prefix_length = sizeof(prefix) - 1U;
+    if (length < prefix_length ||
+        memcmp(packet, prefix, prefix_length) != 0) {
+        return false;
+    }
+
+    const uint8_t *annex = packet + prefix_length;
+    const uint8_t *range = memchr(annex,
+                                  ':',
+                                  (size_t)(packet + length - annex));
+    if (range == NULL) {
+        return send_error(fd, 1U);
+    }
+    const char *xml = feature_xml(annex, (size_t)(range - annex));
+    if (xml == NULL) {
+        return send_text_packet(fd, "");
+    }
+
+    const uint8_t *start = range + 1U;
+    const uint8_t *comma = memchr(start,
+                                  ',',
+                                  (size_t)(packet + length - start));
+    uint32_t offset = 0U;
+    uint32_t requested = 0U;
+    if (comma == NULL ||
+        !parse_hex_u32(start, (size_t)(comma - start), &offset) ||
+        !parse_hex_u32(comma + 1U,
+                       (size_t)(packet + length - comma - 1U),
+                       &requested)) {
+        return send_error(fd, 1U);
+    }
+
+    size_t total = strlen(xml);
+    if ((uint64_t)offset >= (uint64_t)total) {
+        return send_text_packet(fd, "l");
+    }
+    size_t count = total - (size_t)offset;
+    if ((uint64_t)requested < (uint64_t)count) {
+        count = (size_t)requested;
+    }
+    char *response = malloc(count + 2U);
+    if (response == NULL) {
+        return send_error(fd, 2U);
+    }
+    response[0] = (size_t)offset + count < total ? 'm' : 'l';
+    memcpy(response + 1U, xml + offset, count);
+    response[count + 1U] = '\0';
+    bool success = send_text_packet(fd, response);
+    free(response);
+    return success;
 }
 
 static bool handle_packet(struct gdb_target *target,
@@ -876,25 +1020,11 @@ static bool handle_packet(struct gdb_target *target,
         if (length >= 10U && memcmp(packet, "qSupported", 10U) == 0) {
             return send_text_packet(fd, "PacketSize=10000;qXfer:features:read+");
         }
-        static const char xml_query[] = "qXfer:features:read:target.xml:";
-        if (length >= sizeof(xml_query) - 1U &&
-            memcmp(packet, xml_query, sizeof(xml_query) - 1U) == 0) {
-            const uint8_t *start = packet + sizeof(xml_query) - 1U;
-            const uint8_t *comma = memchr(start, ',', (size_t)(packet + length - start));
-            uint32_t offset = 0U, requested = 0U;
-            if (comma == NULL || !parse_hex_u32(start, (size_t)(comma - start), &offset) ||
-                !parse_hex_u32(comma + 1U, (size_t)(packet + length - comma - 1U), &requested)) {
-                return send_error(fd, 1U);
-            }
-            size_t total = sizeof(target_xml) - 1U;
-            if (offset >= total) return send_text_packet(fd, "l");
-            size_t count = total - offset;
-            if (count > requested) count = requested;
-            char response[sizeof(target_xml) + 1U];
-            response[0] = offset + count < total ? 'm' : 'l';
-            memcpy(response + 1U, target_xml + offset, count);
-            response[count + 1U] = '\0';
-            return send_text_packet(fd, response);
+        if (length >= strlen("qXfer:features:read:") &&
+            memcmp(packet,
+                   "qXfer:features:read:",
+                   strlen("qXfer:features:read:")) == 0) {
+            return handle_feature_read(fd, packet, length);
         }
         if (length == 9U && memcmp(packet, "qAttached", 9U) == 0) {
             return send_text_packet(fd, "1");

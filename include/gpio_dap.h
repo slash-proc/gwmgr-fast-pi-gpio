@@ -20,6 +20,18 @@ struct gpio_dap_backend {
     uint32_t tar;
 };
 
+/* DCRSR selectors used for Cortex-M system registers. The CFBP registers
+ * encode the byte within the combined CFBP debug register in bits 8..9,
+ * matching the register numbers used by pyOCD and GDB's M-system feature. */
+enum gpio_dap_m_system_register {
+    gpio_dap_msp_register = 17U,
+    gpio_dap_psp_register = 18U,
+    gpio_dap_primask_register = 20U << 8U,
+    gpio_dap_basepri_register = (20U << 8U) | 1U,
+    gpio_dap_faultmask_register = (20U << 8U) | 2U,
+    gpio_dap_control_register = (20U << 8U) | 3U,
+};
+
 int gpio_dap_open(struct gpio_dap_backend *backend,
                   unsigned swclk_pin,
                   unsigned swdio_pin,
@@ -47,6 +59,9 @@ bool gpio_dap_write_memory(struct gpio_dap_backend *backend,
 bool gpio_dap_read_core_register(struct gpio_dap_backend *backend,
                                  unsigned index,
                                  uint32_t *value);
+bool gpio_dap_read_m_system_register(struct gpio_dap_backend *backend,
+                                     unsigned index,
+                                     uint32_t *value);
 bool gpio_dap_write_core_register(struct gpio_dap_backend *backend,
                                   unsigned index,
                                   uint32_t value);
