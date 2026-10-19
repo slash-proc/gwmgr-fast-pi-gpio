@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="780" viewBox="0 0 1280 780">
+  <style>
+    .box{fill:#fff;stroke:#17202a;stroke-width:2;rx:8}.wire{stroke:#17202a;stroke-width:3;fill:none}.thin{stroke:#17202a;stroke-width:2;fill:none}.label{font:18px sans-serif;fill:#17202a}.part{font:bold 21px sans-serif;fill:#17202a}.note{font:15px sans-serif;fill:#36454f}.title{font:bold 27px sans-serif;fill:#17202a}.warn{fill:#fff4d6;stroke:#9a6700;stroke-width:2;rx:8}
+  </style>
+  <text x="35" y="42" class="title">Simple USB / battery / NRST control</text>
+  <text x="35" y="68" class="note">Switch positive rails only. Keep Pi, target, USB, and battery grounds common.</text>
+
+  <rect x="35" y="120" width="180" height="85" class="box"/>
+  <text x="65" y="153" class="part">J1 USB</text><text x="65" y="181" class="label">+5 V / GND</text>
+  <line x1="215" y1="154" x2="315" y2="154" class="wire"/><text x="230" y="137" class="label">+5 V</text>
+  <rect x="315" y="115" width="190" height="105" class="box"/>
+  <text x="383" y="150" class="part">K1</text><text x="342" y="180" class="label">5 V relay</text><text x="350" y="204" class="note">COM → NO</text>
+  <line x1="505" y1="154" x2="625" y2="154" class="wire"/><text x="522" y="137" class="label">TARGET_USB_5V</text>
+  <line x1="410" y1="220" x2="410" y2="275" class="wire"/><text x="425" y="258" class="note">coil −</text>
+
+  <rect x="35" y="330" width="180" height="85" class="box"/>
+  <text x="65" y="363" class="part">J2 BATTERY</text><text x="65" y="391" class="label">+ / −</text>
+  <line x1="215" y1="364" x2="315" y2="364" class="wire"/><text x="230" y="347" class="label">BAT +</text>
+  <rect x="315" y="325" width="190" height="105" class="box"/>
+  <text x="383" y="360" class="part">K2</text><text x="342" y="390" class="label">5 V relay</text><text x="350" y="414" class="note">COM → NO</text>
+  <line x1="505" y1="364" x2="625" y2="364" class="wire"/><text x="522" y="347" class="label">TARGET_BAT+</text>
+  <line x1="410" y1="430" x2="410" y2="485" class="wire"/><text x="425" y="468" class="note">coil −</text>
+
+  <line x1="35" y1="245" x2="625" y2="245" class="wire"/>
+  <line x1="125" y1="205" x2="125" y2="245" class="wire"/><line x1="125" y1="415" x2="125" y2="245" class="wire"/>
+  <text x="235" y="238" class="label">COMMON_GND</text>
+  <line x1="585" y1="245" x2="585" y2="275" class="thin"/><line x1="562" y1="275" x2="608" y2="275" class="thin"/><line x1="568" y1="282" x2="602" y2="282" class="thin"/><line x1="575" y1="289" x2="595" y2="289" class="thin"/>
+  <line x1="585" y1="485" x2="585" y2="515" class="thin"/><line x1="562" y1="515" x2="608" y2="515" class="thin"/><line x1="568" y1="522" x2="602" y2="522" class="thin"/><line x1="575" y1="529" x2="595" y2="529" class="thin"/>
+
+  <rect x="690" y="105" width="240" height="125" class="box"/>
+  <text x="775" y="140" class="part">Q1</text><text x="734" y="169" class="label">2N7000</text><text x="710" y="198" class="note">K1 coil driver</text>
+  <line x1="810" y1="105" x2="810" y2="75" class="wire"/><text x="825" y="82" class="label">Pi +5 V</text>
+  <line x1="810" y1="230" x2="810" y2="260" class="wire"/><line x1="790" y1="260" x2="830" y2="260" class="thin"/><line x1="796" y1="267" x2="824" y2="267" class="thin"/><line x1="802" y1="274" x2="818" y2="274" class="thin"/>
+  <line x1="690" y1="165" x2="600" y2="165" class="wire"/><text x="500" y="190" class="note">GPIO5 → R1 1k</text>
+  <rect x="690" y="315" width="240" height="125" class="box"/>
+  <text x="775" y="350" class="part">Q2</text><text x="734" y="379" class="label">2N7000</text><text x="710" y="408" class="note">K2 coil driver</text>
+  <line x1="810" y1="315" x2="810" y2="285" class="wire"/><text x="825" y="292" class="label">Pi +5 V</text>
+  <line x1="810" y1="440" x2="810" y2="470" class="wire"/><line x1="790" y1="470" x2="830" y2="470" class="thin"/><line x1="796" y1="477" x2="824" y2="477" class="thin"/><line x1="802" y1="484" x2="818" y2="484" class="thin"/>
+  <line x1="690" y1="375" x2="600" y2="375" class="wire"/><text x="500" y="400" class="note">GPIO6 → R2 1k</text>
+  <text x="950" y="140" class="note">D1/D2: diode across each coil</text><text x="950" y="164" class="note">cathode toward Pi +5 V</text><text x="950" y="205" class="note">Gate pulldowns: 100 kΩ</text>
+
+  <rect x="690" y="560" width="240" height="120" class="box"/>
+  <text x="775" y="595" class="part">Q3</text><text x="735" y="624" class="label">BSS138</text><text x="710" y="653" class="note">open-drain NRST</text>
+  <line x1="690" y1="620" x2="570" y2="620" class="wire"/><text x="365" y="615" class="label">GPIO26 → R3 1k</text>
+  <line x1="810" y1="680" x2="810" y2="715" class="wire"/><line x1="787" y1="715" x2="833" y2="715" class="thin"/><line x1="793" y1="722" x2="827" y2="722" class="thin"/><line x1="800" y1="729" x2="820" y2="729" class="thin"/>
+  <line x1="930" y1="620" x2="1080" y2="620" class="wire"/><text x="950" y="600" class="label">TARGET_NRST</text>
+  <rect x="1080" y="570" width="160" height="100" class="box"/>
+  <text x="1120" y="607" class="part">J3</text><text x="1100" y="636" class="label">SWD + NRST</text><text x="1100" y="658" class="note">GND common</text>
+
+  <rect x="35" y="610" width="525" height="105" class="warn"/>
+  <text x="58" y="642" class="part">Important</text><text x="58" y="670" class="label">Do not close K1 and K2 together if they feed the same rail.</text><text x="58" y="696" class="label">A 1S Li-ion battery is not 5 V without a boost converter.</text>
+</svg>

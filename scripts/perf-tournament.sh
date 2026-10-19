@@ -6,18 +6,13 @@
 set -u
 set -o pipefail
 
-if [[ "${EUID}" -ne 0 ]]; then
-    echo "run this hardware benchmark as root: sudo $0" >&2
-    exit 2
-fi
-
 project=${PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}
 address=${READ_ADDRESS:-0x24000000}
 length=${READ_LENGTH:-262144}
 expected=${EXPECTED_SHA256:-0af1975d460cc1ff8e94ce3fc3542ac4a14ecddc4133e2aed0ff7da1ac539884}
-report=${REPORT:-/tmp/rpi-fast-gpio-performance.csv}
+report=${REPORT:-/tmp/gwmgr-fast-pi-gpio-performance.csv}
 cc_bin=${CC:-cc}
-tmpdir=$(mktemp -d /tmp/rpi-fast-gpio-tournament.XXXXXX)
+tmpdir=$(mktemp -d /tmp/gwmgr-fast-pi-gpio-tournament.XXXXXX)
 stage1="$tmpdir/stage1.tsv"
 
 cleanup() { rm -rf "$tmpdir"; }
@@ -30,8 +25,8 @@ printf 'report=%s address=%s length=%s expected=%s\n' \
 base_flags=(
     -Wall -Wextra -Wpedantic -Wconversion -Wshadow
     -O3 -flto
-    -DRPI_FAST_GPIO_STORE_BARRIERS
-    -DRPI_FAST_GPIO_READ_BARRIERS
+    -DGWMGR_FAST_PI_GPIO_STORE_BARRIERS
+    -DGWMGR_FAST_PI_GPIO_READ_BARRIERS
 )
 cpu_sources=(
     "$project/src/main.c"
@@ -43,19 +38,19 @@ variant_names=(validated full-barrier no-rise no-input-read no-swdio-write no-fs
 variant_flags() {
     case "$1" in
         validated)
-            printf '%s\n' -DRPI_FAST_GPIO_NO_CLOCK_RISE_BARRIERS \
-                -DRPI_FAST_GPIO_NO_INPUT_READ_BARRIERS \
-                -DRPI_FAST_GPIO_NO_SWDIO_WRITE_BARRIERS ;;
+            printf '%s\n' -DGWMGR_FAST_PI_GPIO_NO_CLOCK_RISE_BARRIERS \
+                -DGWMGR_FAST_PI_GPIO_NO_INPUT_READ_BARRIERS \
+                -DGWMGR_FAST_PI_GPIO_NO_SWDIO_WRITE_BARRIERS ;;
         full-barrier)
-            printf '%s\n' -DRPI_FAST_GPIO_FULL_BARRIERS ;;
+            printf '%s\n' -DGWMGR_FAST_PI_GPIO_FULL_BARRIERS ;;
         no-rise)
-            printf '%s\n' -DRPI_FAST_GPIO_NO_CLOCK_RISE_BARRIERS ;;
+            printf '%s\n' -DGWMGR_FAST_PI_GPIO_NO_CLOCK_RISE_BARRIERS ;;
         no-input-read)
-            printf '%s\n' -DRPI_FAST_GPIO_NO_INPUT_READ_BARRIERS ;;
+            printf '%s\n' -DGWMGR_FAST_PI_GPIO_NO_INPUT_READ_BARRIERS ;;
         no-swdio-write)
-            printf '%s\n' -DRPI_FAST_GPIO_NO_SWDIO_WRITE_BARRIERS ;;
+            printf '%s\n' -DGWMGR_FAST_PI_GPIO_NO_SWDIO_WRITE_BARRIERS ;;
         no-fsel)
-            printf '%s\n' -DRPI_FAST_GPIO_NO_FSEL_BARRIERS ;;
+            printf '%s\n' -DGWMGR_FAST_PI_GPIO_NO_FSEL_BARRIERS ;;
         unrolled)
             printf '%s\n' -funroll-loops ;;
         cortex-a72)
@@ -149,9 +144,9 @@ done
 printf '\nStage 3: native CMSIS-DAP TransferBlock path\n'
 dap_binary="$tmpdir/cmsis-dap-read"
 if "$cc_bin" "${base_flags[@]}" \
-    -DRPI_FAST_GPIO_NO_CLOCK_RISE_BARRIERS \
-    -DRPI_FAST_GPIO_NO_INPUT_READ_BARRIERS \
-    -DRPI_FAST_GPIO_NO_SWDIO_WRITE_BARRIERS \
+    -DGWMGR_FAST_PI_GPIO_NO_CLOCK_RISE_BARRIERS \
+    -DGWMGR_FAST_PI_GPIO_NO_INPUT_READ_BARRIERS \
+    -DGWMGR_FAST_PI_GPIO_NO_SWDIO_WRITE_BARRIERS \
     -I"$project/include" \
     "$project/src/cmsis_dap_read.c" "$project/src/cmsis_dap.c" \
     "$project/src/gpio_dap.c" "$project/src/gpio_mmio.c" "$project/src/swd.c" \

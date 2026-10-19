@@ -1,0 +1,4 @@
+(sym_lib_table
+	(version 7)
+	(lib (name "simple-relay-control-cache") (type "Legacy") (uri "${KIPRJMOD}/simple-relay-control-cache.lib") (options "") (descr "Legacy project cache library"))
+)

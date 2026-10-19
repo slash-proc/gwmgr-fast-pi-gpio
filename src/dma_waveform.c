@@ -123,7 +123,7 @@ static bool vcsm_block_alloc(size_t size, struct vcsm_block *block)
         .cached = 0U,
         .handle = -1,
     };
-    memcpy(allocation.name, "rpi-fast-gpio", sizeof("rpi-fast-gpio"));
+    memcpy(allocation.name, "gwmgr-fast-pi-gpio", sizeof("gwmgr-fast-pi-gpio"));
     if (ioctl(vcsm_fd, VC_SM_CMA_IOCTL_MEM_ALLOC, &allocation) < 0 || allocation.handle < 0) {
         (void)close(vcsm_fd);
         return false;

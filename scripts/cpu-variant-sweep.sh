@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -u
 
-project=/home/doug/Nerd/git/rpi-fast-gpio
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+project=$(cd -- "$script_dir/.." && pwd)
 address=0x24000000
 length=262144
 clock=128000000
@@ -21,9 +22,9 @@ printf 'variant,result,hash\n'
 build_and_run() {
     local name="$1"
     shift
-    local binary="/tmp/rpi-fast-gpio-${name}"
-    local output="/tmp/rpi-fast-gpio-${name}.bin"
-    local log="/tmp/rpi-fast-gpio-${name}.log"
+    local binary="/tmp/gwmgr-fast-pi-gpio-${name}"
+    local output="/tmp/gwmgr-fast-pi-gpio-${name}.bin"
+    local log="/tmp/gwmgr-fast-pi-gpio-${name}.log"
 
     if ! cc -O3 -Wall -Wextra -Wpedantic -Wconversion -Wshadow \
         "$@" -I"$project/include" \
@@ -45,20 +46,20 @@ build_and_run() {
 
 build_and_run full-generic
 build_and_run full-a72 -mcpu=cortex-a72
-build_and_run barriers-generic -DRPI_FAST_GPIO_STORE_BARRIERS -DRPI_FAST_GPIO_READ_BARRIERS
+build_and_run barriers-generic -DGWMGR_FAST_PI_GPIO_STORE_BARRIERS -DGWMGR_FAST_PI_GPIO_READ_BARRIERS
 build_and_run barriers-a72 -mcpu=cortex-a72 \
-    -DRPI_FAST_GPIO_STORE_BARRIERS -DRPI_FAST_GPIO_READ_BARRIERS
-build_and_run none-generic -DRPI_FAST_GPIO_NO_BARRIERS
-build_and_run none-a72 -mcpu=cortex-a72 -DRPI_FAST_GPIO_NO_BARRIERS
+    -DGWMGR_FAST_PI_GPIO_STORE_BARRIERS -DGWMGR_FAST_PI_GPIO_READ_BARRIERS
+build_and_run none-generic -DGWMGR_FAST_PI_GPIO_NO_BARRIERS
+build_and_run none-a72 -mcpu=cortex-a72 -DGWMGR_FAST_PI_GPIO_NO_BARRIERS
 build_and_run no-store-generic \
-    -DRPI_FAST_GPIO_NO_STORE_BARRIERS -DRPI_FAST_GPIO_READ_BARRIERS
+    -DGWMGR_FAST_PI_GPIO_NO_STORE_BARRIERS -DGWMGR_FAST_PI_GPIO_READ_BARRIERS
 build_and_run no-store-lto -flto \
-    -DRPI_FAST_GPIO_NO_STORE_BARRIERS -DRPI_FAST_GPIO_READ_BARRIERS
+    -DGWMGR_FAST_PI_GPIO_NO_STORE_BARRIERS -DGWMGR_FAST_PI_GPIO_READ_BARRIERS
 build_and_run barriers-lto -flto \
-    -DRPI_FAST_GPIO_STORE_BARRIERS -DRPI_FAST_GPIO_READ_BARRIERS
+    -DGWMGR_FAST_PI_GPIO_STORE_BARRIERS -DGWMGR_FAST_PI_GPIO_READ_BARRIERS
 build_and_run no-rise-generic \
-    -DRPI_FAST_GPIO_STORE_BARRIERS -DRPI_FAST_GPIO_READ_BARRIERS \
-    -DRPI_FAST_GPIO_NO_CLOCK_RISE_BARRIERS
+    -DGWMGR_FAST_PI_GPIO_STORE_BARRIERS -DGWMGR_FAST_PI_GPIO_READ_BARRIERS \
+    -DGWMGR_FAST_PI_GPIO_NO_CLOCK_RISE_BARRIERS
 build_and_run no-rise-lto -flto \
-    -DRPI_FAST_GPIO_STORE_BARRIERS -DRPI_FAST_GPIO_READ_BARRIERS \
-    -DRPI_FAST_GPIO_NO_CLOCK_RISE_BARRIERS
+    -DGWMGR_FAST_PI_GPIO_STORE_BARRIERS -DGWMGR_FAST_PI_GPIO_READ_BARRIERS \
+    -DGWMGR_FAST_PI_GPIO_NO_CLOCK_RISE_BARRIERS

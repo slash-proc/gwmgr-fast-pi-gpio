@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-gadget=/sys/kernel/config/usb_gadget/rpi-fast-gpio
+gadget=/sys/kernel/config/usb_gadget/gwmgr-fast-pi-gpio
 functionfs=/dev/ffs/cmsis-dap
 config=${gadget}/configs/c.1
 udc=${1:-}
@@ -14,9 +14,9 @@ printf '0x0200\n' >"$gadget/bcdUSB"
 printf '0x1209\n' >"$gadget/idVendor"
 printf '0x0001\n' >"$gadget/idProduct"
 mkdir -p "$gadget/strings/0x409"
-printf 'rpi-fast-gpio\n' >"$gadget/strings/0x409/manufacturer"
+printf 'gwmgr-fast-pi-gpio\n' >"$gadget/strings/0x409/manufacturer"
 printf 'Raspberry Pi CMSIS-DAPv2\n' >"$gadget/strings/0x409/product"
-printf 'rpi-fast-gpio-0001\n' >"$gadget/strings/0x409/serialnumber"
+printf 'gwmgr-fast-pi-gpio-0001\n' >"$gadget/strings/0x409/serialnumber"
 mkdir -p "$config/strings/0x409"
 printf 'CMSIS-DAPv2\n' >"$config/strings/0x409/configuration"
 mkdir -p "$gadget/functions/ffs.cmsis-dap"
@@ -38,5 +38,5 @@ if [ -z "$udc" ]; then
 fi
 
 printf 'FunctionFS prepared at %s\n' "$functionfs"
-printf 'Start build/cmsis-dap-functionfs as root, then bind with:\n'
+printf 'Start build/cmsis-dap-functionfs, then bind with:\n'
 printf '  printf %s > %s/UDC\n' "$udc" "$gadget"

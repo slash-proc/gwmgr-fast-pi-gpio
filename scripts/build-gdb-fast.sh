@@ -11,8 +11,8 @@ fi
 
 cc -O3 -flto -Wall -Wextra -Wpedantic -Wconversion -Wshadow \
     "${arch_flags[@]}" \
-    -DRPI_FAST_GPIO_STORE_BARRIERS \
-    -DRPI_FAST_GPIO_READ_BARRIERS \
+    -DGWMGR_FAST_PI_GPIO_STORE_BARRIERS \
+    -DGWMGR_FAST_PI_GPIO_READ_BARRIERS \
     -I"$project/include" \
     "$project/src/gdb_swd.c" "$project/src/gpio_dap.c" \
     "$project/src/gpio_mmio.c" "$project/src/cmsis_dap.c" \

@@ -1,62 +1,62 @@
 cmake_minimum_required(VERSION 3.16)
-project(rpi_fast_gpio C)
+project(gwmgr_fast_pi_gpio C)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
-option(RPI_FAST_GPIO_RELAXED_BARRIERS
+option(GWMGR_FAST_PI_GPIO_RELAXED_BARRIERS
        "Use the validated ARM store/load barrier split"
        ON)
-option(RPI_FAST_GPIO_LTO
+option(GWMGR_FAST_PI_GPIO_LTO
        "Enable link-time optimization for the probe binaries"
        ON)
-option(RPI_FAST_GPIO_NO_CLOCK_RISE_BARRIERS
+option(GWMGR_FAST_PI_GPIO_NO_CLOCK_RISE_BARRIERS
        "Omit the fused-reader barrier after a rising SWCLK edge"
        ON)
-option(RPI_FAST_GPIO_NO_INPUT_READ_BARRIERS
+option(GWMGR_FAST_PI_GPIO_NO_INPUT_READ_BARRIERS
        "Omit the fused-reader barrier between SWCLK-low and input sampling"
        ON)
-option(RPI_FAST_GPIO_NO_SWDIO_WRITE_BARRIERS
+option(GWMGR_FAST_PI_GPIO_NO_SWDIO_WRITE_BARRIERS
        "Omit fused-reader barriers after SWDIO data writes"
        ON)
-option(RPI_FAST_GPIO_A72_TUNING
+option(GWMGR_FAST_PI_GPIO_A72_TUNING
        "Tune ARM builds for the Raspberry Pi 4 Cortex-A72"
        ON)
-set(RPI_FAST_GPIO_CMSIS_DAP_PACKET_SIZE 1024 CACHE STRING
+set(GWMGR_FAST_PI_GPIO_CMSIS_DAP_PACKET_SIZE 1024 CACHE STRING
     "CMSIS-DAP packet size in bytes (use 4096 for native TCP experiments)")
 
 add_compile_options(-Wall -Wextra -Wpedantic -Wconversion -Wshadow)
 add_compile_definitions(
-    RPI_FAST_GPIO_CMSIS_DAP_PACKET_SIZE=${RPI_FAST_GPIO_CMSIS_DAP_PACKET_SIZE}
+    GWMGR_FAST_PI_GPIO_CMSIS_DAP_PACKET_SIZE=${GWMGR_FAST_PI_GPIO_CMSIS_DAP_PACKET_SIZE}
 )
 
-if(RPI_FAST_GPIO_A72_TUNING AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64)$")
+if(GWMGR_FAST_PI_GPIO_A72_TUNING AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64)$")
     add_compile_options(-mcpu=cortex-a72 -mtune=cortex-a72)
 endif()
 
-if(RPI_FAST_GPIO_LTO)
+if(GWMGR_FAST_PI_GPIO_LTO)
     add_compile_options(-flto)
     add_link_options(-flto)
 endif()
 
-if(RPI_FAST_GPIO_RELAXED_BARRIERS)
+if(GWMGR_FAST_PI_GPIO_RELAXED_BARRIERS)
     add_compile_definitions(
-        RPI_FAST_GPIO_STORE_BARRIERS
-        RPI_FAST_GPIO_READ_BARRIERS
+        GWMGR_FAST_PI_GPIO_STORE_BARRIERS
+        GWMGR_FAST_PI_GPIO_READ_BARRIERS
     )
 endif()
 
-if(RPI_FAST_GPIO_NO_CLOCK_RISE_BARRIERS)
-    add_compile_definitions(RPI_FAST_GPIO_NO_CLOCK_RISE_BARRIERS)
+if(GWMGR_FAST_PI_GPIO_NO_CLOCK_RISE_BARRIERS)
+    add_compile_definitions(GWMGR_FAST_PI_GPIO_NO_CLOCK_RISE_BARRIERS)
 endif()
 
-if(RPI_FAST_GPIO_NO_INPUT_READ_BARRIERS)
-    add_compile_definitions(RPI_FAST_GPIO_NO_INPUT_READ_BARRIERS)
+if(GWMGR_FAST_PI_GPIO_NO_INPUT_READ_BARRIERS)
+    add_compile_definitions(GWMGR_FAST_PI_GPIO_NO_INPUT_READ_BARRIERS)
 endif()
 
-if(RPI_FAST_GPIO_NO_SWDIO_WRITE_BARRIERS)
-    add_compile_definitions(RPI_FAST_GPIO_NO_SWDIO_WRITE_BARRIERS)
+if(GWMGR_FAST_PI_GPIO_NO_SWDIO_WRITE_BARRIERS)
+    add_compile_definitions(GWMGR_FAST_PI_GPIO_NO_SWDIO_WRITE_BARRIERS)
 endif()
 
 add_library(swd_protocol

@@ -11,8 +11,8 @@
 #include <time.h>
 #include <unistd.h>
 
-#ifndef RPI_FAST_GPIO_GPIO_PHYS_BASE
-#define RPI_FAST_GPIO_GPIO_PHYS_BASE UINT32_C(0xfe200000)
+#ifndef GWMGR_FAST_PI_GPIO_GPIO_PHYS_BASE
+#define GWMGR_FAST_PI_GPIO_GPIO_PHYS_BASE UINT32_C(0xfe200000)
 #endif
 
 enum {
@@ -24,9 +24,9 @@ enum {
 
 static inline void gpio_mmio_store_barrier(void)
 {
-#if defined(RPI_FAST_GPIO_NO_BARRIERS) || defined(RPI_FAST_GPIO_NO_STORE_BARRIERS)
+#if defined(GWMGR_FAST_PI_GPIO_NO_BARRIERS) || defined(GWMGR_FAST_PI_GPIO_NO_STORE_BARRIERS)
     __asm__ __volatile__("" ::: "memory");
-#elif defined(__aarch64__) && defined(RPI_FAST_GPIO_STORE_BARRIERS) && !defined(RPI_FAST_GPIO_FULL_BARRIERS)
+#elif defined(__aarch64__) && defined(GWMGR_FAST_PI_GPIO_STORE_BARRIERS) && !defined(GWMGR_FAST_PI_GPIO_FULL_BARRIERS)
     __asm__ __volatile__("dmb ishst" ::: "memory");
 #else
     __sync_synchronize();
@@ -35,12 +35,12 @@ static inline void gpio_mmio_store_barrier(void)
 
 static inline void gpio_mmio_io_barrier(void)
 {
-#if defined(RPI_FAST_GPIO_NO_BARRIERS) || \
-    defined(RPI_FAST_GPIO_NO_INPUT_READ_BARRIERS)
+#if defined(GWMGR_FAST_PI_GPIO_NO_BARRIERS) || \
+    defined(GWMGR_FAST_PI_GPIO_NO_INPUT_READ_BARRIERS)
     __asm__ __volatile__("" ::: "memory");
-#elif defined(__aarch64__) && defined(RPI_FAST_GPIO_READ_BARRIERS) && !defined(RPI_FAST_GPIO_FULL_BARRIERS)
+#elif defined(__aarch64__) && defined(GWMGR_FAST_PI_GPIO_READ_BARRIERS) && !defined(GWMGR_FAST_PI_GPIO_FULL_BARRIERS)
     __asm__ __volatile__("dmb ishld" ::: "memory");
-#elif defined(__aarch64__) && defined(RPI_FAST_GPIO_STORE_BARRIERS) && !defined(RPI_FAST_GPIO_FULL_BARRIERS)
+#elif defined(__aarch64__) && defined(GWMGR_FAST_PI_GPIO_STORE_BARRIERS) && !defined(GWMGR_FAST_PI_GPIO_FULL_BARRIERS)
     __asm__ __volatile__("dmb ish" ::: "memory");
 #else
     __sync_synchronize();
@@ -76,7 +76,7 @@ int gpio_mmio_open(struct gpio_mmio *gpio,
     }
 
     int fd;
-#if defined(RPI_FAST_GPIO_USE_DEVMEM)
+#if defined(GWMGR_FAST_PI_GPIO_USE_DEVMEM)
     fd = open("/dev/mem", O_RDWR | O_SYNC);
 #else
     fd = open("/dev/gpiomem", O_RDWR | O_SYNC);
@@ -85,8 +85,8 @@ int gpio_mmio_open(struct gpio_mmio *gpio,
         return errno;
     }
 
-#if defined(RPI_FAST_GPIO_USE_DEVMEM)
-    off_t mapping_offset = (off_t)RPI_FAST_GPIO_GPIO_PHYS_BASE;
+#if defined(GWMGR_FAST_PI_GPIO_USE_DEVMEM)
+    off_t mapping_offset = (off_t)GWMGR_FAST_PI_GPIO_GPIO_PHYS_BASE;
 #else
     off_t mapping_offset = 0;
 #endif
@@ -153,7 +153,7 @@ void gpio_mmio_set_swdio_output(void *ctx, bool output)
     }
     *gpio->swdio_fsel = output ? gpio->swdio_fsel_output
                                : gpio->swdio_fsel_input;
-#if !defined(RPI_FAST_GPIO_NO_FSEL_BARRIERS)
+#if !defined(GWMGR_FAST_PI_GPIO_NO_FSEL_BARRIERS)
     gpio_mmio_store_barrier();
 #endif
     gpio->swdio_is_output = output;
@@ -295,7 +295,7 @@ static inline void gpio_fast_clock(struct gpio_mmio *gpio)
     *(gpio->swclk_clear) = gpio->swclk_mask;
     gpio_mmio_store_barrier();
     *(gpio->swclk_set) = gpio->swclk_mask;
-#if !defined(RPI_FAST_GPIO_NO_CLOCK_RISE_BARRIERS)
+#if !defined(GWMGR_FAST_PI_GPIO_NO_CLOCK_RISE_BARRIERS)
     gpio_mmio_store_barrier();
 #endif
 }
@@ -321,7 +321,7 @@ static inline void gpio_fast_write_bit(struct gpio_mmio *gpio, bool high)
      * it can pass read tests while corrupting target RAM writes. */
     if (swdio_changes) {
         *(high ? gpio->swdio_set : gpio->swdio_clear) = gpio->swdio_mask;
-#if !defined(RPI_FAST_GPIO_NO_SWDIO_WRITE_BARRIERS)
+#if !defined(GWMGR_FAST_PI_GPIO_NO_SWDIO_WRITE_BARRIERS)
         gpio_mmio_store_barrier();
 #endif
         gpio->swdio_output_level = high;
@@ -336,7 +336,7 @@ static inline bool gpio_fast_read_bit(struct gpio_mmio *gpio)
     gpio_mmio_io_barrier();
     bool high = (*gpio->swdio_level & gpio->swdio_mask) != 0U;
     *(gpio->swclk_set) = gpio->swclk_mask;
-#if !defined(RPI_FAST_GPIO_NO_CLOCK_RISE_BARRIERS)
+#if !defined(GWMGR_FAST_PI_GPIO_NO_CLOCK_RISE_BARRIERS)
     gpio_mmio_store_barrier();
 #endif
     return high;
@@ -374,7 +374,7 @@ static inline void gpio_fast_turnaround_to_output(struct gpio_mmio *gpio)
     gpio_fast_clock(gpio);
     gpio_fast_set_output(gpio, true);
     *(gpio->swdio_set) = gpio->swdio_mask;
-#if !defined(RPI_FAST_GPIO_NO_SWDIO_WRITE_BARRIERS)
+#if !defined(GWMGR_FAST_PI_GPIO_NO_SWDIO_WRITE_BARRIERS)
     gpio_mmio_store_barrier();
 #endif
     gpio->swdio_output_level = true;

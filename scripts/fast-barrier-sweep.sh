@@ -2,13 +2,14 @@
 
 set -u
 
-project=/home/doug/Nerd/git/rpi-fast-gpio
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+project=$(cd -- "$script_dir/.." && pwd)
 expected=0af1975d460cc1ff8e94ce3fc3542ac4a14ecddc4133e2aed0ff7da1ac539884
 common=(
     -O3 -flto -Wall -Wextra -Wpedantic -Wconversion -Wshadow
-    -DRPI_FAST_GPIO_STORE_BARRIERS
-    -DRPI_FAST_GPIO_READ_BARRIERS
-    -DRPI_FAST_GPIO_NO_CLOCK_RISE_BARRIERS
+    -DGWMGR_FAST_PI_GPIO_STORE_BARRIERS
+    -DGWMGR_FAST_PI_GPIO_READ_BARRIERS
+    -DGWMGR_FAST_PI_GPIO_NO_CLOCK_RISE_BARRIERS
     -I"$project/include"
     "$project/src/main.c" "$project/src/gpio_mmio.c" "$project/src/swd.c"
 )
@@ -19,9 +20,9 @@ printf 'variant,result,hash\n'
 build_and_run() {
     local name=$1
     shift
-    local binary="/tmp/rpi-fast-gpio-barrier-${name}"
-    local output="/tmp/rpi-fast-gpio-barrier-${name}.bin"
-    local log="/tmp/rpi-fast-gpio-barrier-${name}.log"
+    local binary="/tmp/gwmgr-fast-pi-gpio-barrier-${name}"
+    local output="/tmp/gwmgr-fast-pi-gpio-barrier-${name}.bin"
+    local log="/tmp/gwmgr-fast-pi-gpio-barrier-${name}.log"
     if ! cc "${common[@]}" "$@" -o "$binary"; then
         printf '%s,compile-failed,-\n' "$name"
         return
@@ -43,8 +44,8 @@ build_and_run() {
 }
 
 build_and_run baseline
-build_and_run no-input-read -DRPI_FAST_GPIO_NO_INPUT_READ_BARRIERS
-build_and_run no-fsel -DRPI_FAST_GPIO_NO_INPUT_READ_BARRIERS \
-    -DRPI_FAST_GPIO_NO_FSEL_BARRIERS
-build_and_run no-swdio-write -DRPI_FAST_GPIO_NO_INPUT_READ_BARRIERS \
-    -DRPI_FAST_GPIO_NO_SWDIO_WRITE_BARRIERS
+build_and_run no-input-read -DGWMGR_FAST_PI_GPIO_NO_INPUT_READ_BARRIERS
+build_and_run no-fsel -DGWMGR_FAST_PI_GPIO_NO_INPUT_READ_BARRIERS \
+    -DGWMGR_FAST_PI_GPIO_NO_FSEL_BARRIERS
+build_and_run no-swdio-write -DGWMGR_FAST_PI_GPIO_NO_INPUT_READ_BARRIERS \
+    -DGWMGR_FAST_PI_GPIO_NO_SWDIO_WRITE_BARRIERS

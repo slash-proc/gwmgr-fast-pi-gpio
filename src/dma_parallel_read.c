@@ -185,7 +185,7 @@ static bool vcsm_block_alloc(size_t size, struct vcsm_block *block)
         .cached = 0U,
         .handle = -1,
     };
-    memcpy(allocation.name, "rpi-fast-parallel", sizeof("rpi-fast-parallel"));
+    memcpy(allocation.name, "gwmgr-fast-pi-gpio-parallel", sizeof("gwmgr-fast-pi-gpio-parallel"));
     if (ioctl(fd, _IOR('J', 0x5a, struct vcsm_alloc), &allocation) < 0 ||
         allocation.handle < 0 || allocation.dma_address > UINT32_MAX) {
         (void)close(fd);

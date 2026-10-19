@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -u
 
-project=/home/doug/Nerd/git/rpi-fast-gpio
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+project=$(cd -- "$script_dir/.." && pwd)
 binary="$project/build/spi3wire-burst-read"
 
 cc -O3 -I"$project/include" -Wall -Wextra -Wpedantic -Wconversion -Wshadow \
@@ -9,8 +10,6 @@ cc -O3 -I"$project/include" -Wall -Wextra -Wpedantic -Wconversion -Wshadow \
     "$project/src/spi3wire_burst_read.c" \
     "$project/src/gpio_mmio.c" \
     "$project/src/swd.c" || exit 1
-
-sudo -v || exit 1
 
 printf 'SPI handoff matrix (GPIO11/SCLK, GPIO10/MOSI/MOMI)\n'
 printf 'submission,sync,speed,id,dp,ap,burst\n'
@@ -22,7 +21,7 @@ for submission in separate combined; do
             if [ "$submission" = combined ]; then
                 probe_flag=--combined-probe
             fi
-            result=$(timeout 12s sudo -n "$binary" \
+            result=$(timeout 12s "$binary" \
                 --address 0x24000000 \
                 --words 1 \
                 --speed "$speed" \

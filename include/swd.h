@@ -1,5 +1,5 @@
-#ifndef RPI_FAST_GPIO_SWD_H
-#define RPI_FAST_GPIO_SWD_H
+#ifndef GWMGR_FAST_PI_GPIO_SWD_H
+#define GWMGR_FAST_PI_GPIO_SWD_H
 
 #include <stdbool.h>
 #include <stddef.h>

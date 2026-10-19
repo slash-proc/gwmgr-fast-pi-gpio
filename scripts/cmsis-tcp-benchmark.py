@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Benchmark the rpi-fast-gpio CMSIS-DAP TCP framing with TransferBlock."""
+"""Benchmark the gwmgr-fast-pi-gpio CMSIS-DAP TCP framing with TransferBlock."""
 
 from __future__ import annotations
 

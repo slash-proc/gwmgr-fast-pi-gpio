@@ -88,11 +88,11 @@ static size_t process_info(const uint8_t *request,
     }
     switch (request[1]) {
     case 0x01U:
-        return response_string(dap_info, "rpi-fast-gpio", response, capacity);
+        return response_string(dap_info, "gwmgr-fast-pi-gpio", response, capacity);
     case 0x02U:
         return response_string(dap_info, "Raspberry Pi SWD Probe", response, capacity);
     case 0x03U:
-        return response_string(dap_info, "rpi-fast-gpio-0001", response, capacity);
+        return response_string(dap_info, "gwmgr-fast-pi-gpio-0001", response, capacity);
     case 0x04U:
         return response_string(dap_info, "2.1.0", response, capacity);
     case 0xf0U:

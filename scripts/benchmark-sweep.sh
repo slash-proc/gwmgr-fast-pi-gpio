@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -u
 
-project_dir=${1:-/home/doug/Nerd/git/rpi-fast-gpio}
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+project_dir=${1:-$(cd -- "$script_dir/.." && pwd)}
 read_address=${READ_ADDRESS:-0x24000000}
 read_length=${READ_LENGTH:-262144}
 binary=${BINARY:-./build/swd-read-fast}
@@ -20,7 +21,7 @@ printf '%-12s %s\n' 'requested_hz' 'result'
 printf '%-12s %s\n' '------------' '------'
 
 for clock in "${clocks[@]}"; do
-    log_file="/tmp/rpi-fast-gpio-sweep-${clock}.log"
+    log_file="/tmp/gwmgr-fast-pi-gpio-sweep-${clock}.log"
 
     if "$binary" \
         --clock "$clock" \

@@ -27,7 +27,7 @@ for speed in 8000000 12000000 20000000 24000000 32000000; do
     status=run-failed
     rate=
     hash=
-    if sudo -n timeout 20s /tmp/spi3wire-burst-read-tournament \
+    if timeout 20s /tmp/spi3wire-burst-read-tournament \
         --address "$address" --words "$words" --speed "$speed" \
         --sync swj --output "$output" >"$log" 2>&1; then
         rate=$(sed -n 's/.*(\([0-9][0-9.]*\) KiB\/s.*/\1/p' "$log" | tail -n 1)
@@ -50,7 +50,7 @@ for divider in 2 4 6 8 10 12 16 20 24 32; do
     status=run-failed
     rate=
     hash=
-    if sudo -n timeout 20s /tmp/spi-swd-burst-read-tournament \
+    if timeout 20s /tmp/spi-swd-burst-read-tournament \
         --words "$words" --divider "$divider" --retries 3 \
         --output "$output" >"$log" 2>&1; then
         rate=$(sed -n 's/.*(\([0-9][0-9.]*\) KiB\/s.*/\1/p' "$log" | tail -n 1)

@@ -11,27 +11,27 @@ cc_bin=${CC:-cc}
 
 base_flags=(
     -O3 -flto -Wall -Wextra -Wpedantic -Wconversion -Wshadow
-    -DRPI_FAST_GPIO_STORE_BARRIERS
-    -DRPI_FAST_GPIO_READ_BARRIERS
-    -DRPI_FAST_GPIO_NO_CLOCK_RISE_BARRIERS
-    -DRPI_FAST_GPIO_NO_INPUT_READ_BARRIERS
-    -DRPI_FAST_GPIO_NO_SWDIO_WRITE_BARRIERS
+    -DGWMGR_FAST_PI_GPIO_STORE_BARRIERS
+    -DGWMGR_FAST_PI_GPIO_READ_BARRIERS
+    -DGWMGR_FAST_PI_GPIO_NO_CLOCK_RISE_BARRIERS
+    -DGWMGR_FAST_PI_GPIO_NO_INPUT_READ_BARRIERS
+    -DGWMGR_FAST_PI_GPIO_NO_SWDIO_WRITE_BARRIERS
 )
 
 printf 'interval,status,rate_kib_s,sha256\n'
 for interval in 1 2 4 8; do
-    binary="/tmp/rpi-fast-barrier-${interval}"
-    output="/tmp/rpi-fast-barrier-${interval}.bin"
-    log="/tmp/rpi-fast-barrier-${interval}.log"
+    binary="/tmp/gwmgr-fast-pi-gpio-barrier-${interval}"
+    output="/tmp/gwmgr-fast-pi-gpio-barrier-${interval}.bin"
+    log="/tmp/gwmgr-fast-pi-gpio-barrier-${interval}.log"
     if ! "$cc_bin" "${base_flags[@]}" \
-        "-DRPI_FAST_GPIO_CLOCK_BARRIER_INTERVAL=${interval}" \
+        "-DGWMGR_FAST_PI_GPIO_CLOCK_BARRIER_INTERVAL=${interval}" \
         -I"$project/include" \
         "$project/src/main.c" "$project/src/gpio_mmio.c" "$project/src/swd.c" \
         -o "$binary"; then
         printf '%s,compile-failed,,\n' "$interval"
         continue
     fi
-    if sudo -n timeout 20s "$binary" --fast-gpio \
+    if timeout 20s "$binary" --fast-gpio \
         --clock 128000000 --address "$address" --length "$length" \
         --output "$output" >"$log" 2>&1; then
         rate=$(sed -n 's/.*(\([0-9][0-9.]*\) KiB\/s.*/\1/p' "$log" | tail -n 1)

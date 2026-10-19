@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="1350" viewBox="0 0 2200 1350">
+  <style>
+    .wire{stroke:#111;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+    .thin{stroke:#111;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+    .symbol{stroke:#111;stroke-width:3;fill:#fff}
+    .body{stroke:#111;stroke-width:2;fill:#fff;stroke-dasharray:9 7}
+    .label{font:20px sans-serif;fill:#111}
+    .part{font:bold 24px sans-serif;fill:#111}
+    .title{font:bold 32px sans-serif;fill:#111}
+    .section{font:bold 20px sans-serif;fill:#555}
+    .note{font:16px sans-serif;fill:#34495e}
+    .net{font:bold 18px sans-serif;fill:#075985}
+    .nc{font:italic 17px sans-serif;fill:#777}
+    .bg{fill:#fff}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#0f1115}
+      .symbol{fill:#17202a;stroke:#f8fafc}.body{fill:#17202a;stroke:#f8fafc}
+      .wire,.thin{stroke:#f8fafc}.label,.part,.title{fill:#f8fafc}
+      .section{fill:#cbd5e1}.note{fill:#cbd5e1}.net{fill:#7dd3fc}.nc{fill:#94a3b8}
+    }
+  </style>
+
+  <rect x="0" y="0" width="2200" height="1350" class="bg"/>
+
+  <text x="50" y="45" class="title">USB / battery relay selection and NRST control</text>
+  <text x="50" y="75" class="note">K1 and K2 are independent SPDT relays. Use COM and NO; leave NC unconnected. All grounds remain common for SWD.</text>
+
+  <text x="50" y="125" class="section">POWER CONTACTS</text>
+
+  <!-- USB input -->
+  <rect x="60" y="170" width="180" height="145" class="symbol"/>
+  <text x="120" y="210" class="part">J1</text><text x="93" y="242" class="label">USB INPUT</text>
+  <text x="93" y="275" class="label">+5V</text><text x="93" y="302" class="label">GND</text>
+  <line x1="240" y1="260" x2="330" y2="260" class="wire"/><text x="250" y="242" class="net">USB_5V</text>
+  <line x1="240" y1="300" x2="240" y2="340" class="wire"/><line x1="220" y1="340" x2="260" y2="340" class="thin"/><line x1="226" y1="347" x2="254" y2="347" class="thin"/><line x1="232" y1="354" x2="248" y2="354" class="thin"/><text x="270" y="345" class="net">COMMON_GND</text>
+
+  <!-- K1 relay -->
+  <rect x="330" y="145" width="430" height="330" class="body"/>
+  <text x="530" y="178" class="part">K1</text><text x="470" y="205" class="note">USB power relay</text>
+  <circle cx="395" cy="260" r="6" fill="#111"/><line x1="395" y1="260" x2="535" y2="215" class="wire"/>
+  <circle cx="580" cy="215" r="6" fill="#111"/><line x1="580" y1="215" x2="760" y2="215" class="wire"/>
+  <circle cx="580" cy="290" r="6" fill="#111"/><line x1="580" y1="290" x2="625" y2="290" class="thin"/><text x="635" y="296" class="nc">NC</text>
+  <line x1="330" y1="260" x2="395" y2="260" class="wire"/><text x="335" y="248" class="label">COM</text>
+  <text x="620" y="198" class="net">TARGET_USB_5V</text>
+  <!-- K1 coil -->
+  <text x="370" y="365" class="label">A1</text><text x="665" y="365" class="label">A2</text>
+  <line x1="395" y1="380" x2="430" y2="380" class="wire"/>
+  <path d="M430 380 C450 340 470 420 490 380 C510 340 530 420 550 380 C570 340 590 420 610 380" class="wire"/>
+  <line x1="610" y1="380" x2="695" y2="380" class="wire"/>
+  <text x="365" y="420" class="net">PI_5V</text><text x="575" y="420" class="net">K1_COIL_LOW</text>
+  <!-- K1 diode across coil -->
+  <line x1="710" y1="380" x2="710" y2="345" class="wire"/><polygon points="697,325 723,325 710,295" class="symbol"/><line x1="692" y1="290" x2="728" y2="290" class="wire"/><line x1="710" y1="290" x2="710" y2="250" class="wire"/><line x1="710" y1="250" x2="650" y2="250" class="wire"/><text x="725" y="315" class="part">D1</text><text x="725" y="340" class="note">1N4007</text>
+
+  <!-- Battery input -->
+  <rect x="60" y="570" width="180" height="145" class="symbol"/>
+  <text x="120" y="610" class="part">J2</text><text x="85" y="642" class="label">BATTERY</text>
+  <text x="93" y="675" class="label">BAT+</text><text x="93" y="702" class="label">BAT−</text>
+  <line x1="240" y1="660" x2="330" y2="660" class="wire"/><text x="250" y="642" class="net">BAT+</text>
+  <line x1="240" y1="700" x2="240" y2="740" class="wire"/><line x1="220" y1="740" x2="260" y2="740" class="thin"/><line x1="226" y1="747" x2="254" y2="747" class="thin"/><line x1="232" y1="754" x2="248" y2="754" class="thin"/><text x="270" y="745" class="net">COMMON_GND</text>
+
+  <!-- K2 relay -->
+  <rect x="330" y="545" width="430" height="330" class="body"/>
+  <text x="530" y="578" class="part">K2</text><text x="455" y="605" class="note">Battery power relay</text>
+  <circle cx="395" cy="660" r="6" fill="#111"/><line x1="395" y1="660" x2="535" y2="615" class="wire"/>
+  <circle cx="580" cy="615" r="6" fill="#111"/><line x1="580" y1="615" x2="760" y2="615" class="wire"/>
+  <circle cx="580" cy="690" r="6" fill="#111"/><line x1="580" y1="690" x2="625" y2="690" class="thin"/><text x="635" y="696" class="nc">NC</text>
+  <line x1="330" y1="660" x2="395" y2="660" class="wire"/><text x="335" y="648" class="label">COM</text>
+  <text x="620" y="598" class="net">TARGET_BAT+</text>
+  <!-- K2 coil -->
+  <text x="370" y="765" class="label">A1</text><text x="665" y="765" class="label">A2</text>
+  <line x1="395" y1="780" x2="430" y2="780" class="wire"/>
+  <path d="M430 780 C450 740 470 820 490 780 C510 740 530 820 550 780 C570 740 590 820 610 780" class="wire"/>
+  <line x1="610" y1="780" x2="695" y2="780" class="wire"/>
+  <text x="365" y="820" class="net">PI_5V</text><text x="575" y="820" class="net">K2_COIL_LOW</text>
+  <!-- K2 diode across coil -->
+  <line x1="710" y1="780" x2="710" y2="745" class="wire"/><polygon points="697,725 723,725 710,695" class="symbol"/><line x1="692" y1="690" x2="728" y2="690" class="wire"/><line x1="710" y1="690" x2="710" y2="650" class="wire"/><line x1="710" y1="650" x2="650" y2="650" class="wire"/><text x="725" y="715" class="part">D2</text><text x="725" y="740" class="note">1N4007</text>
+
+  <!-- Target connector -->
+  <rect x="1510" y="150" width="420" height="500" class="symbol"/>
+  <text x="1680" y="195" class="part">J3</text><text x="1620" y="225" class="label">TARGET / SWD</text>
+  <line x1="1510" y1="275" x2="1380" y2="275" class="wire"/><text x="1535" y="282" class="label">TARGET_USB_5V</text>
+  <line x1="1510" y1="335" x2="1380" y2="335" class="wire"/><text x="1535" y="342" class="label">TARGET_BAT+</text>
+  <line x1="1510" y1="395" x2="1380" y2="395" class="wire"/><text x="1535" y="402" class="label">TARGET_IOVDD</text>
+  <line x1="1510" y1="455" x2="1380" y2="455" class="wire"/><text x="1535" y="462" class="label">NRST</text>
+  <line x1="1510" y1="515" x2="1380" y2="515" class="wire"/><text x="1535" y="522" class="label">SWDIO</text>
+  <line x1="1510" y1="575" x2="1380" y2="575" class="wire"/><text x="1535" y="582" class="label">SWCLK</text>
+  <line x1="1510" y1="615" x2="1380" y2="615" class="wire"/><text x="1535" y="622" class="label">GND</text>
+  <text x="1200" y="270" class="net">TARGET_USB_5V</text><text x="1200" y="330" class="net">TARGET_BAT+</text>
+
+  <!-- control section -->
+  <text x="850" y="925" class="section">PI GPIO AND RELAY COIL DRIVERS</text>
+  <rect x="80" y="950" width="270" height="220" class="symbol"/>
+  <text x="180" y="990" class="part">J4</text><text x="130" y="1020" class="label">PI CONTROL</text>
+  <text x="115" y="1060" class="label">PI_5V</text><text x="115" y="1090" class="label">GPIO5</text><text x="115" y="1120" class="label">GPIO6</text><text x="115" y="1150" class="label">GPIO26</text>
+
+  <!-- Q1 driver -->
+  <text x="470" y="965" class="part">K1 DRIVER</text>
+  <text x="470" y="1005" class="net">GPIO5</text><line x1="530" y1="1000" x2="590" y2="1000" class="wire"/>
+  <polyline points="590,1000 605,980 620,1020 635,980 650,1020 665,1000" class="wire"/><text x="605" y="1050" class="note">R1 1 kΩ</text>
+  <line x1="665" y1="1000" x2="725" y2="1000" class="wire"/><line x1="725" y1="1000" x2="725" y2="1030" class="wire"/>
+  <line x1="710" y1="1030" x2="710" y2="1100" class="wire"/><line x1="730" y1="1030" x2="730" y2="1100" class="wire"/><line x1="710" y1="1045" x2="690" y2="1045" class="wire"/><line x1="730" y1="1020" x2="730" y2="1045" class="wire"/><line x1="730" y1="1100" x2="730" y2="1160" class="wire"/><line x1="710" y1="1100" x2="690" y2="1100" class="wire"/><line x1="690" y1="1100" x2="665" y2="1100" class="wire"/>
+  <text x="680" y="1015" class="part">Q1</text><text x="670" y="1185" class="note">2N7000</text>
+  <line x1="725" y1="1020" x2="725" y2="960" class="wire"/><text x="735" y="965" class="net">K1_COIL_LOW</text>
+  <line x1="665" y1="1100" x2="665" y2="1130" class="wire"/><polyline points="665,1130 680,1110 695,1150 710,1110 725,1150 740,1130" class="wire"/><line x1="740" y1="1130" x2="740" y2="1160" class="wire"/><text x="750" y="1140" class="part">R4</text><text x="750" y="1160" class="note">100 kΩ</text>
+
+  <!-- Q2 driver -->
+  <text x="900" y="965" class="part">K2 DRIVER</text>
+  <text x="900" y="1005" class="net">GPIO6</text><line x1="960" y1="1000" x2="1020" y2="1000" class="wire"/>
+  <polyline points="1020,1000 1035,980 1050,1020 1065,980 1080,1020 1095,1000" class="wire"/><text x="1035" y="1050" class="note">R2 1 kΩ</text>
+  <line x1="1095" y1="1000" x2="1155" y2="1000" class="wire"/><line x1="1155" y1="1000" x2="1155" y2="1030" class="wire"/>
+  <line x1="1140" y1="1030" x2="1140" y2="1100" class="wire"/><line x1="1160" y1="1030" x2="1160" y2="1100" class="wire"/><line x1="1140" y1="1045" x2="1120" y2="1045" class="wire"/><line x1="1160" y1="1020" x2="1160" y2="1045" class="wire"/><line x1="1160" y1="1100" x2="1160" y2="1160" class="wire"/><line x1="1140" y1="1100" x2="1120" y2="1100" class="wire"/><line x1="1120" y1="1100" x2="1095" y2="1100" class="wire"/>
+  <text x="1110" y="1015" class="part">Q2</text><text x="1100" y="1185" class="note">2N7000</text>
+  <line x1="1155" y1="1020" x2="1155" y2="960" class="wire"/><text x="1165" y="965" class="net">K2_COIL_LOW</text>
+  <line x1="1095" y1="1100" x2="1095" y2="1130" class="wire"/><polyline points="1095,1130 1110,1110 1125,1150 1140,1110 1155,1150 1170,1130" class="wire"/><line x1="1170" y1="1130" x2="1170" y2="1160" class="wire"/><text x="1180" y="1140" class="part">R5</text><text x="1180" y="1160" class="note">100 kΩ</text>
+
+  <!-- Q3 NRST driver -->
+  <text x="1370" y="965" class="part">NRST DRIVER</text>
+  <text x="1370" y="1005" class="net">GPIO26</text><line x1="1445" y1="1000" x2="1505" y2="1000" class="wire"/>
+  <polyline points="1505,1000 1520,980 1535,1020 1550,980 1565,1020 1580,1000" class="wire"/><text x="1520" y="1050" class="note">R3 1 kΩ</text>
+  <line x1="1580" y1="1000" x2="1640" y2="1000" class="wire"/><line x1="1640" y1="1000" x2="1640" y2="1030" class="wire"/>
+  <line x1="1625" y1="1030" x2="1625" y2="1100" class="wire"/><line x1="1645" y1="1030" x2="1645" y2="1100" class="wire"/><line x1="1625" y1="1045" x2="1605" y2="1045" class="wire"/><line x1="1645" y1="1020" x2="1645" y2="1045" class="wire"/><line x1="1645" y1="1100" x2="1645" y2="1160" class="wire"/><line x1="1625" y1="1100" x2="1605" y2="1100" class="wire"/><line x1="1605" y1="1100" x2="1580" y2="1100" class="wire"/>
+  <text x="1595" y="1015" class="part">Q3</text><text x="1590" y="1185" class="note">BSS138</text>
+  <line x1="1640" y1="1020" x2="1640" y2="960" class="wire"/><text x="1650" y="965" class="net">TARGET_NRST</text>
+  <line x1="1730" y1="960" x2="1730" y2="1000" class="wire"/><polyline points="1730,1000 1745,980 1760,1020 1775,980 1790,1020 1805,1000" class="wire"/><line x1="1805" y1="1000" x2="1805" y2="960" class="wire"/><text x="1740" y="1050" class="note">R6 10 kΩ</text><text x="1815" y="965" class="net">TARGET_IOVDD</text>
+
+  <!-- common ground bus -->
+  <line x1="60" y1="1230" x2="1930" y2="1230" class="wire"/><text x="70" y="1265" class="net">COMMON_GND</text>
+  <line x1="240" y1="1230" x2="240" y2="300" class="wire"/><line x1="240" y1="1230" x2="240" y2="700" class="wire"/>
+  <line x1="730" y1="1160" x2="730" y2="1230" class="wire"/><line x1="1160" y1="1160" x2="1160" y2="1230" class="wire"/><line x1="1645" y1="1160" x2="1645" y2="1230" class="wire"/>
+  <line x1="1930" y1="615" x2="1930" y2="1230" class="wire"/>
+
+  <text x="50" y="1310" class="note">Do not close K1 and K2 together if their outputs feed one target rail. A 1-cell Li-ion battery is 3.0–4.2 V, not regulated 5 V.</text>
+</svg>

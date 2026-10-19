@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -u
 
-project=/home/doug/Nerd/git/rpi-fast-gpio
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+project=$(cd -- "$script_dir/.." && pwd)
 binary="$project/build/spi-swd-burst-read"
 
 cc -O3 -I"$project/include" -Wall -Wextra -Wpedantic -Wconversion -Wshadow \

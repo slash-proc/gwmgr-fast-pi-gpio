@@ -207,7 +207,7 @@ static bool vcsm_block_alloc(size_t size, struct vcsm_block *block)
         .cached = 0U,
         .handle = -1,
     };
-    memcpy(allocation.name, "rpi-fast-gpio-swd", sizeof("rpi-fast-gpio-swd"));
+    memcpy(allocation.name, "gwmgr-fast-pi-gpio-swd", sizeof("gwmgr-fast-pi-gpio-swd"));
     if (ioctl(vcsm_fd, VC_SM_CMA_IOCTL_MEM_ALLOC, &allocation) < 0 ||
         allocation.handle < 0 || allocation.dma_address > UINT32_MAX) {
         (void)close(vcsm_fd);

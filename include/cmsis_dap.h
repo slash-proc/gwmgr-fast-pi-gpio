@@ -1,5 +1,5 @@
-#ifndef RPI_FAST_GPIO_CMSIS_DAP_H
-#define RPI_FAST_GPIO_CMSIS_DAP_H
+#ifndef GWMGR_FAST_PI_GPIO_CMSIS_DAP_H
+#define GWMGR_FAST_PI_GPIO_CMSIS_DAP_H
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -9,12 +9,12 @@
  * transfer block that fits its transport. The eventual USB HS FunctionFS
  * endpoint will advertise this same value. Keep the standard 1024-byte
  * default, while allowing larger TCP/native experiments at build time. */
-#ifndef RPI_FAST_GPIO_CMSIS_DAP_PACKET_SIZE
-#define RPI_FAST_GPIO_CMSIS_DAP_PACKET_SIZE 1024U
+#ifndef GWMGR_FAST_PI_GPIO_CMSIS_DAP_PACKET_SIZE
+#define GWMGR_FAST_PI_GPIO_CMSIS_DAP_PACKET_SIZE 1024U
 #endif
 
 enum {
-    cmsis_dap_packet_size = RPI_FAST_GPIO_CMSIS_DAP_PACKET_SIZE,
+    cmsis_dap_packet_size = GWMGR_FAST_PI_GPIO_CMSIS_DAP_PACKET_SIZE,
     cmsis_dap_packet_count = 1U,
 };
 

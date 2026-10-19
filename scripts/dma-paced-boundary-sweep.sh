@@ -13,7 +13,7 @@ cc -O3 -flto -mcpu=cortex-a72 -mtune=cortex-a72 \
 printf 'idle_cycles,status\n'
 for idle in 0 1 2 4 8 16; do
     log="/tmp/dma-paced-idle-${idle}.log"
-    if sudo -n timeout 20s "$binary" \
+    if timeout 20s "$binary" \
         --address 0x24000000 --words 1 --pacer 10000000 \
         --idle "$idle" --output "/tmp/dma-paced-idle-${idle}.bin" \
         >"$log" 2>&1; then

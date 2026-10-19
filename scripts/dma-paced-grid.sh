@@ -19,7 +19,7 @@ for pacer_hz in 1000000 5000000 10000000 20000000 40000000; do
         for idle in 0 4; do
             output="/tmp/dma-paced-grid-${pacer_hz}-${feed_batch}-${idle}.bin"
             log="/tmp/dma-paced-grid-${pacer_hz}-${feed_batch}-${idle}.log"
-            if sudo -n timeout "${timeout_s}s" "$binary" \
+            if timeout "${timeout_s}s" "$binary" \
                 --address 0x24000000 --words "$words" --pacer "$pacer_hz" \
                 --feed-batch "$feed_batch" --idle "$idle" \
                 --output "$output" >"$log" 2>&1; then

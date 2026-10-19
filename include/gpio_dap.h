@@ -1,5 +1,5 @@
-#ifndef RPI_FAST_GPIO_DAP_H
-#define RPI_FAST_GPIO_DAP_H
+#ifndef GWMGR_FAST_PI_GPIO_DAP_H
+#define GWMGR_FAST_PI_GPIO_DAP_H
 
 #include "cmsis_dap.h"
 #include "gpio_mmio.h"

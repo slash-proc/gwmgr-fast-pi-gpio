@@ -15,7 +15,7 @@ from ._native import tcp_ready
 
 
 def _default_probe() -> str:
-    configured = os.environ.get("RPI_FAST_GPIO_GDB_SWD")
+    configured = os.environ.get("GWMGR_FAST_PI_GPIO_GDB_SWD")
     if configured:
         return configured
     found = shutil.which("gdb-swd")

@@ -2,13 +2,14 @@
 
 set -u
 
-project=/home/doug/Nerd/git/rpi-fast-gpio
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+project=$(cd -- "$script_dir/.." && pwd)
 expected=0af1975d460cc1ff8e94ce3fc3542ac4a14ecddc4133e2aed0ff7da1ac539884
 common=(
     -Wall -Wextra -Wpedantic -Wconversion -Wshadow
-    -DRPI_FAST_GPIO_STORE_BARRIERS
-    -DRPI_FAST_GPIO_READ_BARRIERS
-    -DRPI_FAST_GPIO_NO_CLOCK_RISE_BARRIERS
+    -DGWMGR_FAST_PI_GPIO_STORE_BARRIERS
+    -DGWMGR_FAST_PI_GPIO_READ_BARRIERS
+    -DGWMGR_FAST_PI_GPIO_NO_CLOCK_RISE_BARRIERS
     -I"$project/include"
     "$project/src/main.c" "$project/src/gpio_mmio.c" "$project/src/swd.c"
 )
@@ -19,9 +20,9 @@ printf 'variant,result,hash\n'
 build_and_run() {
     local name=$1
     shift
-    local binary="/tmp/rpi-fast-gpio-${name}"
-    local output="/tmp/rpi-fast-gpio-${name}.bin"
-    local log="/tmp/rpi-fast-gpio-${name}.log"
+    local binary="/tmp/gwmgr-fast-pi-gpio-${name}"
+    local output="/tmp/gwmgr-fast-pi-gpio-${name}.bin"
+    local log="/tmp/gwmgr-fast-pi-gpio-${name}.log"
     if ! cc "$@" "${common[@]}" -o "$binary"; then
         printf '%s,compile-failed,-\n' "$name"
         return
